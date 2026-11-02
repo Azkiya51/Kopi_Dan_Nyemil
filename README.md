@@ -1,8 +1,8 @@
 # ☕ Kopi dan Nyemil
 
 Aplikasi mobile pemesanan kopi dan camilan berbasis **Android (Kotlin + Jetpack Compose)**
-dengan tema **biru muda dan putih**. Dibuat untuk tugas mata kuliah **Pengembangan Aplikasi Mobile**
-berdasarkan wireframe "Kopi dan Nyemil".
+dengan tema **biru muda dan putih**. Dibuat untuk Memenuhi UTS mata kuliah **Pengembangan Aplikasi Mobile**
+
 
 > Tagline: *Get a taste of your wish*
 
