@@ -1,38 +1,35 @@
-package com.kopidannyemil.app
+package com.kopidannyemil.app.data
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import com.kopidannyemil.app.data.DummyData
-import com.kopidannyemil.app.data.User
+/** Penyimpanan data in-memory (tanpa database). */
+object AppRepository {
 
-/** State aplikasi (in-memory, tanpa database). */
-class AppViewModel : ViewModel() {
+    private val users = mutableListOf(User("Budi Santoso", "demo", "demo123"))
 
-    private val users = mutableStateListOf(User("Budi Santoso", "demo", "demo123"))
-
-    var currentUser by mutableStateOf<User?>(null)
+    var currentUser: User? = null
         private set
 
     /** id menu -> jumlah */
-    val cart = mutableStateMapOf<Int, Int>()
+    val cart = LinkedHashMap<Int, Int>()
 
-    var lastOrderTotal by mutableStateOf(0)
+    var lastOrderTotal = 0
         private set
-    var lastOrderCount by mutableStateOf(0)
+    var lastOrderCount = 0
         private set
-    var lastOrderAddress by mutableStateOf("")
+    var lastOrderAddress = ""
         private set
 
     val userName: String get() = currentUser?.name ?: "Teman"
 
     val totalItems: Int get() = cart.values.sum()
+
     val totalPrice: Int
-        get() = cart.entries.sumOf { (id, qty) ->
-            (DummyData.menu.firstOrNull { it.id == id }?.price ?: 0) * qty
+        get() {
+            var total = 0
+            for ((id, qty) in cart) {
+                val price = DummyData.menu.firstOrNull { it.id == id }?.price ?: 0
+                total += price * qty
+            }
+            return total
         }
 
     /** @return pesan error, atau null jika berhasil */
@@ -44,10 +41,11 @@ class AppViewModel : ViewModel() {
         return null
     }
 
+    /** @return pesan error, atau null jika berhasil */
     fun register(name: String, username: String, password: String): String? {
         if (name.isBlank() || username.isBlank() || password.isBlank()) return "Semua kolom wajib diisi"
         if (password.length < 6) return "Password minimal 6 karakter"
-        if (users.any { it.username.equals(username.trim(), true) }) return "Username sudah dipakai"
+        if (users.any { it.username.equals(username.trim(), ignoreCase = true) }) return "Username sudah dipakai"
         val user = User(name.trim(), username.trim(), password)
         users.add(user)
         currentUser = user
@@ -62,10 +60,14 @@ class AppViewModel : ViewModel() {
         currentUser = updated
     }
 
-    fun add(id: Int) { cart[id] = (cart[id] ?: 0) + 1 }
+    fun quantityOf(id: Int): Int = cart[id] ?: 0
+
+    fun add(id: Int) {
+        cart[id] = quantityOf(id) + 1
+    }
 
     fun remove(id: Int) {
-        val q = cart[id] ?: return
+        val q = quantityOf(id)
         if (q <= 1) cart.remove(id) else cart[id] = q - 1
     }
 
